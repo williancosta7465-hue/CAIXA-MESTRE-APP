@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, 'Noto Sans', 'Liberation Sans', sans-serif;
+  background: #0b2948;
+}
+
+.cm-bg {
+  background-image: url('/fundo.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  width: 100vw;
+  height: 100vh;
+}
+
+.cm-bg-overlay {
+  background: linear-gradient(180deg, rgba(11, 41, 72, 0.70), rgba(11, 41, 72, 0.80));
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Cards com overlay azul escuro 88% */
+.cm-card {
+  background: rgba(11, 41, 72, 0.88);
+  backdrop-filter: blur(10px);
+}
+
+/* Esconder scrollbar mas manter funcionalidade de scroll */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+main {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Fix select dropdown contrast */
+select {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+select option {
+  color: #0b2948;
+  background-color: white;
+}
+
+/* Ensure list items have good contrast */
+li {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Fix any white backgrounds with white text issues */
+.bg-white\/10 option,
+.bg-white\/5 option {
+  color: #0b2948;
+  background-color: white;
+}
+
+select:focus {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
+}
