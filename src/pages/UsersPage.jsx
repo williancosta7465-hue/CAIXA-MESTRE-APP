@@ -4,12 +4,24 @@ import { addAuditLog } from '../data/audit.js'
 import { useAuth } from '../auth/AuthProvider.jsx'
 import Toast from '../components/Toast.jsx'
 import Modal from '../components/Modal.jsx'
+import { canManageUsers, canAccessSettings, canMoveStock, canEditCatalog, canViewCatalog, canViewReports } from '../utils/permissions.js'
 
 const PERFIS = [
   { value: 'admin', label: 'Administrador' },
   { value: 'almoxarife', label: 'Almoxarife' },
   { value: 'visualizador', label: 'Visualizador' }
 ]
+
+function getPermissionsDescription(perfil) {
+  const permissions = []
+  if (canManageUsers(perfil)) permissions.push('Gerenciar usuários')
+  if (canAccessSettings(perfil)) permissions.push('Acessar configurações')
+  if (canMoveStock(perfil)) permissions.push('Mover estoque')
+  if (canEditCatalog(perfil)) permissions.push('Editar catálogo')
+  if (canViewCatalog(perfil)) permissions.push('Ver catálogo')
+  if (canViewReports(perfil)) permissions.push('Ver relatórios')
+  return permissions.length > 0 ? permissions.join(', ') : 'Sem permissões'
+}
 
 export default function UsersPage() {
   const { session } = useAuth()
@@ -18,6 +30,7 @@ export default function UsersPage() {
   const [toastType, setToastType] = useState('info')
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [showPasswords, setShowPasswords] = useState({})
 
   const [form, setForm] = useState({
     nome: '',
@@ -287,6 +300,9 @@ export default function UsersPage() {
                 <div className={`mt-1 text-xs ${u.ativo ? 'text-emerald-400' : 'text-red-400'}`}>
                   {u.ativo ? 'Ativo' : 'Inativo'}
                 </div>
+                <div className="mt-1 text-xs text-white/50">
+                  Permissões: {getPermissionsDescription(u.perfil)}
+                </div>
               </div>
               <div className="flex flex-col gap-1">
                 {u.login !== 'admin' && (
@@ -341,13 +357,25 @@ export default function UsersPage() {
           </div>
           <div>
             <div className="text-xs text-white/70">Senha {editingUser && '(deixe em branco para manter)'}</div>
-            <input
-              type="password"
-              value={form.senha}
-              onChange={(e) => setForm(f => ({ ...f, senha: e.target.value }))}
-              className="mt-1 w-full rounded-xl bg-white/10 px-3 py-3 text-sm outline-none"
-              placeholder={editingUser ? 'Nova senha (opcional)' : 'Mínimo 6 caracteres'}
-            />
+            <div className="mt-1 relative">
+              <input
+                type={showPasswords[editingUser?.id || 'new'] ? 'text' : 'password'}
+                value={form.senha}
+                onChange={(e) => setForm(f => ({ ...f, senha: e.target.value }))}
+                className="w-full rounded-xl bg-white/10 px-3 py-3 pr-10 text-sm outline-none"
+                placeholder={editingUser ? 'Nova senha (opcional)' : 'Mínimo 6 caracteres'}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPasswords(prev => ({ 
+                  ...prev, 
+                  [editingUser?.id || 'new']: !prev[editingUser?.id || 'new'] 
+                }))}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
+              >
+                {showPasswords[editingUser?.id || 'new'] ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
           </div>
           <div>
             <div className="text-xs text-white/70">Perfil</div>
