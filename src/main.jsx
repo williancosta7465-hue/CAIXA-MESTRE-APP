@@ -24,7 +24,7 @@ if (window.location.pathname.includes('~and~') ||
   if (typeof sessionStorage !== 'undefined') sessionStorage.clear();
   
   // Redirecionar para raiz limpa
-  window.location.replace('/CAIXA-MESTRE-APP/');
+  window.location.replace('./');
 }
 
 // Capturar prompt de instalação PWA

@@ -35,7 +35,7 @@ export default function Shell() {
         <header className="shrink-0 px-4 pt-6">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 overflow-hidden rounded-xl bg-white/10">
-              <img src="/CAIXA-MESTRE-APP/caixa-mestre-logo.png" alt="CAIXA MESTRE" className="h-full w-full object-contain" />
+              <img src="./caixa-mestre-logo.png" alt="CAIXA MESTRE" className="h-full w-full object-contain" />
             </div>
             <div className="flex-1">
               <div className="text-sm font-semibold tracking-wide">CAIXA MESTRE</div>
