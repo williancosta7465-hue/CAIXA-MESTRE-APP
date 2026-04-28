@@ -8,11 +8,20 @@
     <meta name="theme-color" content="#4f46e5" />
     <link rel="stylesheet" href="/CAIXA-MESTRE-APP/tela carregamento/css">
     <script>
-      // LIMPEZA RADICAL - Executa imediatamente
+      // FORÇA BRUTA - Limpar tudo imediatamente
       if (window.location.href.includes('~and~') || window.location.pathname.includes('//')) {
+        // Limpar tudo antes de redirecionar
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(r => r.forEach(s => s.unregister()))
+        }
+        if ('caches' in window) {
+          caches.keys().then(c => c.forEach(n => caches.delete(n)))
+        }
+        // Forçar redirecionamento limpo
+        window.location.href = '/CAIXA-MESTRE-APP/'
         window.location.replace('/CAIXA-MESTRE-APP/')
       }
-      // Limpar Service Worker e caches
+      // Limpar Service Worker e caches mesmo em URLs normais
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(r => r.forEach(s => s.unregister()))
       }
