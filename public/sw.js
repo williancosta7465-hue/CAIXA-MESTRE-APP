@@ -2,7 +2,7 @@ const CACHE_NAME = 'caixa-mestre-v1'
 const urlsToCache = [
   '/CAIXA-MESTRE-APP/',
   '/CAIXA-MESTRE-APP/index.html',
-  '/caixa-mestre-pwa/caixa-mestre-logo.png'
+  '/CAIXA-MESTRE-APP/caixa-mestre-logo.png'
 ]
 
 self.addEventListener('install', (event) => {
