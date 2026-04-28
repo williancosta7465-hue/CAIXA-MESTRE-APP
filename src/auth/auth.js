@@ -26,62 +26,71 @@ export function clearSession() {
 }
 
 export async function login({ login, senha }) {
-  await ensureSeedData()
+  // Primeiro buscar o usuário sem chamar ensureSeedData
   const user = await db.users.where('login').equals(login).first()
+  console.log('Tentativa de login (antes ensureSeedData):', { login, usuarioEncontrado: !!user, ativo: user?.ativo })
 
-  console.log('Tentativa de login:', { login, usuarioEncontrado: !!user, ativo: user?.ativo })
+  // Se não encontrar, então chama ensureSeedData e busca novamente
+  if (!user) {
+    await ensureSeedData()
+    const userAfterSeed = await db.users.where('login').equals(login).first()
+    console.log('Tentativa de login (depois ensureSeedData):', { login, usuarioEncontrado: !!userAfterSeed, ativo: userAfterSeed?.ativo })
+  }
 
-  if (!user || !user.ativo) {
-    console.log('Usuário não encontrado ou inativo:', user)
+  const finalUser = user || await db.users.where('login').equals(login).first()
+  console.log('Usuário final:', finalUser)
+
+  if (!finalUser || !finalUser.ativo) {
+    console.log('Usuário não encontrado ou inativo:', finalUser)
     await addAuditLog({
       usuarioId: null,
       usuarioNome: null,
       acao: 'LOGIN_FALHA',
       detalhes: JSON.stringify({ login, motivo: 'usuario_inexistente_ou_inativo' }),
       tabelaAfetada: 'users',
-      registroId: user?.id ?? null
+      registroId: finalUser?.id ?? null
     })
     throw new Error('Usuário ou senha inválidos.')
   }
 
-  console.log('Verificando senha:', { senhaDigitada: senha, hashArmazenado: user.senhaHash })
-  const ok = await verifyPassword(senha, user.senhaHash)
+  console.log('Verificando senha:', { senhaDigitada: senha, hashArmazenado: finalUser.senhaHash })
+  const ok = await verifyPassword(senha, finalUser.senhaHash)
   console.log('Senha verificada:', ok)
   
   if (!ok) {
-    const tentativas = (user.tentativasLogin ?? 0) + 1
-    await db.users.update(user.id, { tentativasLogin: tentativas })
+    const tentativas = (finalUser.tentativasLogin ?? 0) + 1
+    await db.users.update(finalUser.id, { tentativasLogin: tentativas })
 
     await addAuditLog({
-      usuarioId: user.id,
-      usuarioNome: user.nome,
+      usuarioId: finalUser.id,
+      usuarioNome: finalUser.nome,
       acao: 'LOGIN_FALHA',
       detalhes: JSON.stringify({ login, motivo: 'senha_incorreta', tentativas }),
       tabelaAfetada: 'users',
-      registroId: user.id
+      registroId: finalUser.id
     })
 
     throw new Error('Usuário ou senha inválidos.')
   }
 
-  await db.users.update(user.id, { tentativasLogin: 0, ultimoAcesso: Date.now() })
+  await db.users.update(finalUser.id, { tentativasLogin: 0, ultimoAcesso: Date.now() })
 
   const session = {
-    usuarioId: user.id,
-    usuarioNome: user.nome,
-    login: user.login,
-    perfil: user.perfil,
+    usuarioId: finalUser.id,
+    usuarioNome: finalUser.nome,
+    login: finalUser.login,
+    perfil: finalUser.perfil,
     loginEm: Date.now()
   }
   setSession(session)
 
   await addAuditLog({
-    usuarioId: user.id,
-    usuarioNome: user.nome,
+    usuarioId: finalUser.id,
+    usuarioNome: finalUser.nome,
     acao: 'LOGIN',
-    detalhes: JSON.stringify({ login: user.login, perfil: user.perfil }),
+    detalhes: JSON.stringify({ login: finalUser.login, perfil: finalUser.perfil }),
     tabelaAfetada: 'users',
-    registroId: user.id
+    registroId: finalUser.id
   })
 
   return session
