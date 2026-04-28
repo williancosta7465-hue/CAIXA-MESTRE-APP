@@ -9,13 +9,13 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/caixa-mestre-pwa/caixa-mestre-logo.png",
+      "src": "/CAIXA-MESTRE-APP/caixa-mestre-logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/caixa-mestre-pwa/caixa-mestre-logo.png",
+      "src": "/CAIXA-MESTRE-APP/caixa-mestre-logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
