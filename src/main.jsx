@@ -11,6 +11,37 @@ if (window.location.href.includes('~and~') || window.location.pathname.includes(
   window.location.replace('/CAIXA-MESTRE-APP/')
 }
 
+// Forçar limpeza do Service Worker antigo e caches
+if ('serviceWorker' in navigator) {
+  // Primeiro, tentar desregistrar qualquer SW antigo
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((registration) => {
+      console.log('Desregistrando SW antigo:', registration)
+      registration.unregister()
+    })
+  })
+  
+  // Limpar todos os caches
+  if ('caches' in window) {
+    caches.keys().then((cacheNames) => {
+      cacheNames.forEach((cacheName) => {
+        console.log('Deletando cache:', cacheName)
+        caches.delete(cacheName)
+      })
+    })
+  }
+  
+  // Recarregar a página se havia SW antigo
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    if (registrations.length > 0) {
+      console.log('SW antigo encontrado, recarregando...')
+      setTimeout(() => {
+        window.location.reload()
+      }, 500)
+    }
+  })
+}
+
 // Registrar Service Worker para PWA
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
