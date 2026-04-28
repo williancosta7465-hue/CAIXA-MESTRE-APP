@@ -38,7 +38,7 @@ export async function listProducts({ q = '', tipo = 'todos', status = 'todos' } 
         (p.codigo ?? '').toLowerCase().includes(query)
       )
     })
-    .sort((a, b) => (b.criadoEm ?? 0) - (a.criadoEm ?? 0))
+    .sort((a, b) => (a.nome ?? '').toLowerCase().localeCompare((b.nome ?? '').toLowerCase()))
 }
 
 export async function createProduct(payload) {

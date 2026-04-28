@@ -73,7 +73,7 @@ export default function PendentesPage() {
       result = result.filter(m => (m.dataMovimentacao ?? 0) < limite)
     }
     
-    return result.sort((a, b) => (a.dataMovimentacao ?? 0) - (b.dataMovimentacao ?? 0))
+    return result.sort((a, b) => (b.dataMovimentacao ?? 0) - (a.dataMovimentacao ?? 0))
   }, [items, filtroFuncionario, filtroProduto, filtroDias])
 
   const emManutencaoFiltrados = useMemo(() => {
@@ -89,7 +89,7 @@ export default function PendentesPage() {
       result = result.filter(m => m.produtoNome?.toLowerCase().includes(q))
     }
     
-    return result.sort((a, b) => (a.dataEnvioManutencao ?? 0) - (b.dataEnvioManutencao ?? 0))
+    return result.sort((a, b) => (b.dataEnvioManutencao ?? 0) - (a.dataEnvioManutencao ?? 0))
   }, [maintenanceItems, filtroFuncionario, filtroProduto])
 
   // Dados exibidos conforme aba
