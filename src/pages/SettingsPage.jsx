@@ -238,7 +238,7 @@ export default function SettingsPage() {
   }
 
   async function clearDatabase() {
-    if (!confirm('Tem certeza que deseja limpar TODO o banco de dados? Esta ação não pode ser desfeita!')) return
+    if (!confirm('CAIXA MESTRE - Tem certeza que deseja limpar TODO o banco de dados? Esta ação não pode ser desfeita!')) return
     setBusy(true)
     try {
       await db.delete()
@@ -269,16 +269,22 @@ export default function SettingsPage() {
     const deferredPrompt = window.deferredPrompt
     
     if (deferredPrompt) {
-      deferredPrompt.prompt()
-      const { outcome } = await deferredPrompt.userChoice
-      if (outcome === 'accepted') {
-        setToastType('success')
-        setToast('App instalado com sucesso!')
-      } else {
-        setToastType('info')
-        setToast('Instalação cancelada.')
+      try {
+        deferredPrompt.prompt()
+        const { outcome } = await deferredPrompt.userChoice
+        if (outcome === 'accepted') {
+          setToastType('success')
+          setToast('App instalado com sucesso!')
+        } else {
+          setToastType('info')
+          setToast('Instalação cancelada.')
+        }
+        window.deferredPrompt = null
+      } catch (error) {
+        console.error('Erro ao tentar instalar app:', error)
+        setToastType('error')
+        setToast('Falha ao tentar instalar. Tente novamente.')
       }
-      window.deferredPrompt = null
     } else {
       // No mobile, mostrar instruções específicas
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
