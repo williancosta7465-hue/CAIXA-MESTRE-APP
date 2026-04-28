@@ -10,7 +10,7 @@
 /* PARTE SUPERIOR */
 .topo {
   height: 75%;
-  background: #f4f4f4;
+  background: #0F2A44;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -31,7 +31,7 @@
 .topo h1 {
   margin: 5px 0;
   font-size: 28px;
-  color: #0F2A44;
+  color: white;
 }
 
 .topo h1 span {
@@ -41,7 +41,7 @@
 .topo h2 {
   margin: 0;
   font-size: 14px;
-  color: #0F2A44;
+  color: white;
   letter-spacing: 2px;
 }
 
@@ -49,7 +49,7 @@
 .slogan {
   margin: 20px 0;
   font-size: 14px;
-  color: #0F2A44;
+  color: white;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -64,7 +64,7 @@
 /* LOADING */
 .carregando {
   font-size: 14px;
-  color: #333;
+  color: white;
 }
 
 /* BARRA */
@@ -84,10 +84,10 @@
   animation: carregar 3s linear forwards;
 }
 
-/* BASE AZUL */
+/* BASE LARANJA */
 .base {
   height: 25%;
-  background: linear-gradient(180deg, #0F2A44, #0b2238);
+  background: linear-gradient(180deg, #F57C00, #e56d00);
   display: flex;
   align-items: center;
   justify-content: center;
