@@ -178,6 +178,7 @@ export async function generateOrderPDF(pedido, returnBlob = false) {
   try {
     const possiblePaths = [
       '/caixa-mestre-logo.png',
+      '/CAIXA-MESTRE-APP/caixa-mestre-logo.png',
       '/caixa-mestre-pwa/caixa-mestre-logo.png',
       'caixa-mestre-logo.png',
       './caixa-mestre-logo.png'

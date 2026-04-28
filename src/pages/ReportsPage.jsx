@@ -201,6 +201,7 @@ export default function ReportsPage() {
       try {
         const possiblePaths = [
           '/caixa-mestre-logo.png',
+          '/CAIXA-MESTRE-APP/caixa-mestre-logo.png',
           '/caixa-mestre-pwa/caixa-mestre-logo.png',
           'caixa-mestre-logo.png',
           './caixa-mestre-logo.png'
