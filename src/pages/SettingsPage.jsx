@@ -4,7 +4,7 @@ import { useAuth } from '../auth/AuthProvider.jsx'
 import { db } from '../data/db.js'
 import Toast from '../components/Toast.jsx'
 import BackButton from '../components/BackButton.jsx'
-import { getBackupSettings, saveBackupSettings, createBackup, listBackups, deleteBackup, restoreBackup } from '../data/backup.js'
+import { getBackupSettings, saveBackupSettings, createBackup, listBackups, deleteBackup, restoreBackup, getBackupFolderHandle, selectBackupFolder, listFolderBackups, deleteFolderBackup, restoreFolderBackup, downloadBackup } from '../data/backup.js'
 
 export default function SettingsPage() {
   const { session } = useAuth()
@@ -15,6 +15,7 @@ export default function SettingsPage() {
   const [backupSettings, setBackupSettings] = useState({ enabled: true, interval: 'daily', lastBackup: null })
   const [backups, setBackups] = useState([])
   const [showBackups, setShowBackups] = useState(false)
+  const [backupFolder, setBackupFolder] = useState(null)
 
   useEffect(() => {
     async function loadSettings() {
@@ -22,6 +23,8 @@ export default function SettingsPage() {
       setBackupSettings(settings)
       const list = await listBackups()
       setBackups(list)
+      const folder = await getBackupFolderHandle()
+      setBackupFolder(folder)
     }
     loadSettings()
   }, [])
@@ -94,20 +97,24 @@ export default function SettingsPage() {
     setBusy(true)
     try {
       const backup = await createBackup({ usuario: session })
-      const json = JSON.stringify(backup, null, 2)
-      const blob = new Blob([json], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `backup-caixa-mestre-${backup.dataHora.replace(/[:.]/g, '-')}.json`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-      setToastType('success')
-      setToast('Backup criado e baixado com sucesso.')
+      const result = await downloadBackup(backup)
+      
+      if (result.savedToFolder) {
+        setToastType('success')
+        setToast(`Backup salvo na pasta: ${result.fileName}`)
+      } else {
+        setToastType('success')
+        setToast('Backup criado e baixado com sucesso.')
+      }
+      
       const list = await listBackups()
       setBackups(list)
+      
+      // Se tiver pasta configurada, atualizar lista também
+      if (backupFolder) {
+        const folderBackups = await listFolderBackups()
+        setBackups(folderBackups)
+      }
     } catch (err) {
       setToastType('error')
       setToast(err?.message || 'Falha ao criar backup.')
@@ -125,6 +132,57 @@ export default function SettingsPage() {
       setToast('Backup excluído.')
       const list = await listBackups()
       setBackups(list)
+    } catch (err) {
+      setToastType('error')
+      setToast(err?.message || 'Falha ao excluir.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function handleSelectBackupFolder() {
+    setBusy(true)
+    try {
+      const handle = await selectBackupFolder()
+      setBackupFolder(handle)
+      setToastType('success')
+      setToast('Pasta de backup configurada com sucesso.')
+      
+      // Carregar backups da pasta
+      const folderBackups = await listFolderBackups()
+      setBackups(folderBackups)
+    } catch (err) {
+      setToastType('error')
+      setToast(err?.message || 'Falha ao selecionar pasta.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function handleRestoreFolderBackup(backup) {
+    if (!confirm('Tem certeza que deseja restaurar este backup? Todos os dados atuais serão substituídos.')) return
+    setBusy(true)
+    try {
+      await restoreFolderBackup(backup, { usuario: session })
+      setToastType('success')
+      setToast('Backup restaurado. Recarregue a página.')
+    } catch (err) {
+      setToastType('error')
+      setToast(err?.message || 'Falha ao restaurar.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function handleDeleteFolderBackup(backup) {
+    if (!confirm('Tem certeza que deseja excluir este backup?')) return
+    setBusy(true)
+    try {
+      await deleteFolderBackup(backup)
+      setToastType('success')
+      setToast('Backup excluído.')
+      const folderBackups = await listFolderBackups()
+      setBackups(folderBackups)
     } catch (err) {
       setToastType('error')
       setToast(err?.message || 'Falha ao excluir.')
@@ -220,6 +278,13 @@ export default function SettingsPage() {
             >
               {busy ? 'Criando…' : 'Criar backup agora'}
             </button>
+            <button
+              disabled={busy}
+              onClick={handleSelectBackupFolder}
+              className="w-full rounded-xl bg-blue-600/90 px-3 py-3 text-sm font-semibold text-white disabled:opacity-60"
+            >
+              {busy ? 'Selecionando…' : backupFolder ? '📁 Pasta configurada' : '📁 Selecionar pasta de backup'}
+            </button>
             <label className="block w-full rounded-xl bg-white/10 px-3 py-3 text-center text-sm font-semibold">
               <input
                 type="file"
@@ -246,15 +311,29 @@ export default function SettingsPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="font-semibold">{new Date(backup.dataCriacao).toLocaleString('pt-BR')}</div>
-                        <div className="text-white/50">v{backup.versaoApp}</div>
+                        <div className="text-white/50">
+                          v{backup.versaoApp}
+                          {backup.isFolderBackup && ' 📁'}
+                        </div>
                       </div>
-                      <button
-                        onClick={() => handleDeleteBackup(backup.id)}
-                        disabled={busy}
-                        className="rounded-lg bg-red-500/20 px-2 py-1 text-[10px] text-red-300 hover:bg-red-500/30"
-                      >
-                        Excluir
-                      </button>
+                      <div className="flex gap-1">
+                        {backup.isFolderBackup && (
+                          <button
+                            onClick={() => handleRestoreFolderBackup(backup)}
+                            disabled={busy}
+                            className="rounded-lg bg-emerald-500/20 px-2 py-1 text-[10px] text-emerald-300 hover:bg-emerald-500/30"
+                          >
+                            Restaurar
+                          </button>
+                        )}
+                        <button
+                          onClick={() => backup.isFolderBackup ? handleDeleteFolderBackup(backup) : handleDeleteBackup(backup.id)}
+                          disabled={busy}
+                          className="rounded-lg bg-red-500/20 px-2 py-1 text-[10px] text-red-300 hover:bg-red-500/30"
+                        >
+                          Excluir
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
