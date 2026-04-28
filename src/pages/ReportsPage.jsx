@@ -4,6 +4,7 @@ import BackButton from '../components/BackButton.jsx'
 import { listEmployees } from '../data/employees.js'
 import { getConsumoPorFuncionario, getConsumoPorProduto, getTopPerdas } from '../data/dashboard.js'
 import { db } from '../data/db.js'
+import { useAuth } from '../auth/AuthProvider.jsx'
 
 function formatDate(ts) {
   if (!ts) return '—'
@@ -30,6 +31,7 @@ const EPI_MOTIVOS = [
 ]
 
 export default function ReportsPage() {
+  const { session } = useAuth()
   const [toast, setToast] = useState(null)
   const [toastType, setToastType] = useState('info')
   const [reportType, setReportType] = useState('consumo_funcionario')
@@ -252,7 +254,7 @@ export default function ReportsPage() {
       doc.setFont('helvetica', 'normal')
       doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, 250, 25)
       doc.text(`Registros: ${data.length}`, 250, 35)
-      doc.text('Gerado por: Sistema', 250, 45)
+      doc.text(`Gerado por: ${session?.usuarioNome || 'Sistema'}`, 250, 45)
       
       // Linha separadora após cabeçalho
       doc.setDrawColor(200, 200, 200)

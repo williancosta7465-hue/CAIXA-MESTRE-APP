@@ -141,7 +141,7 @@ function drawTableCell(doc, x, y, width, height, text, align = 'left', isHeader 
   doc.text(text, textX, textY, { align: align === 'center' ? 'center' : 'left' })
 }
 
-export async function generateOrderPDF(pedido, returnBlob = false) {
+export async function generateOrderPDF(pedido, userName = 'Sistema', returnBlob = false) {
   try {
     const { jsPDF } = await import('jspdf')
     // Orientação paisagem (landscape) para caber mais colunas
@@ -229,7 +229,7 @@ export async function generateOrderPDF(pedido, returnBlob = false) {
   doc.setFont('helvetica', 'normal')
   doc.text(`Data: ${new Date(pedido.dataEnvio).toLocaleDateString('pt-BR')}`, 250, 25)
   doc.text(`Itens: ${pedido.itens.length}`, 250, 35)
-  doc.text('Gerado por: Sistema', 250, 45)
+  doc.text(`Gerado por: ${userName}`, 250, 45)
   
   // Linha separadora após cabeçalho
   doc.setDrawColor(200, 200, 200)
@@ -276,37 +276,28 @@ export async function generateOrderPDF(pedido, returnBlob = false) {
   }
 }
 
-export async function shareOrderViaWhatsApp(pedido) {
+export async function shareOrderViaWhatsApp(pedido, userName = 'Sistema') {
   try {
     // Gerar o PDF como blob
-    const pdfBlob = await generateOrderPDF(pedido, true)
+    const pdfBlob = await generateOrderPDF(pedido, userName, true)
     const file = new File([pdfBlob], `pedido-${pedido.numero}.pdf`, { type: 'application/pdf' })
 
     // Tentar usar Web Share API (funciona em mobile moderno)
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
-        files: [file],
         title: `Pedido ${pedido.numero}`,
-        text: `Pedido de compra ${pedido.numero} - ${pedido.itens.length} itens`
+        text: `Pedido de compra Nº ${pedido.numero} com ${pedido.itens.length} itens.`,
+        files: [file]
       })
     } else {
-      // Se não suportar, baixa o PDF e mostra mensagem
-      const url = URL.createObjectURL(pdfBlob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `pedido-${pedido.numero}.pdf`
-      a.click()
-      URL.revokeObjectURL(url)
-      
-      // Abrir WhatsApp com mensagem informando para anexar o PDF
-      const message = `Olá! Segue o Pedido ${pedido.numero} com ${pedido.itens.length} itens. O PDF foi baixado, por favor anexe-o manualmente.`
-      const encoded = encodeURIComponent(message)
-      window.open(`https://wa.me/?text=${encoded}`, '_blank')
+      // Fallback: baixar PDF
+      await generateOrderPDF(pedido, userName, false)
+      alert('PDF baixado. Por favor, anexe-o manualmente no WhatsApp.')
     }
   } catch (err) {
     console.error('Erro ao compartilhar:', err)
     // Fallback: baixar PDF
-    await generateOrderPDF(pedido, false)
+    await generateOrderPDF(pedido, userName, false)
     alert('PDF baixado. Por favor, anexe-o manualmente no WhatsApp.')
   }
 }

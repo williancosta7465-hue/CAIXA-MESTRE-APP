@@ -179,7 +179,7 @@ export default function OrdersPage() {
 
   async function onDownloadPDF(pedido) {
     try {
-      await generateOrderPDF(pedido)
+      await generateOrderPDF(pedido, session?.usuarioNome || 'Sistema')
       setToastType('success')
       setToast('PDF gerado.')
     } catch (err) {
@@ -190,7 +190,7 @@ export default function OrdersPage() {
 
   async function onShareWhatsApp(pedido) {
     try {
-      await shareOrderViaWhatsApp(pedido)
+      await shareOrderViaWhatsApp(pedido, session?.usuarioNome || 'Sistema')
     } catch (err) {
       setToastType('error')
       setToast('Erro ao compartilhar: ' + (err?.message || 'Erro desconhecido'))
