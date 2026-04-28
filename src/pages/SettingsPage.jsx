@@ -89,6 +89,30 @@ export default function SettingsPage() {
         }
       }
 
+      // Se não tiver dados nem version, tentar criar estrutura mínima
+      if (!backupData.dados && !backupData.version) {
+        // Verificar se tem alguma estrutura de dados reconhecível
+        const possibleKeys = ['produtos', 'funcionarios', 'movimentacoes', 'users', 'auditLogs', 'settings']
+        const hasRecognizableData = possibleKeys.some(key => Array.isArray(data[key]))
+        
+        if (hasRecognizableData) {
+          backupData = {
+            id: crypto.randomUUID(),
+            dataCriacao: Date.now(),
+            versaoApp: '1.0.0',
+            dataHora: new Date().toISOString(),
+            dados: {}
+          }
+          possibleKeys.forEach(key => {
+            if (Array.isArray(data[key])) {
+              backupData.dados[key] = data[key]
+            }
+          })
+        } else {
+          throw new Error('Arquivo de backup inválido: formato não reconhecido. O arquivo deve conter dados de produtos, funcionários ou movimentações.')
+        }
+      }
+
       // Validar formato
       if (!backupData.dados) {
         throw new Error('Arquivo de backup inválido: formato não reconhecido.')
