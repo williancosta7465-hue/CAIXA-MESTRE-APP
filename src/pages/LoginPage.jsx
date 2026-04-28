@@ -36,7 +36,7 @@ export default function LoginPage() {
       <div className="relative z-10 mx-auto flex h-full w-full max-w-lg flex-col px-4 py-10 overflow-y-auto">
         <div className="flex flex-col items-center">
           <div className="h-20 w-20 overflow-hidden rounded-3xl bg-white/10">
-            <img src="/CAIXA-MESTRE-APP/caixa-mestre-logo.png" alt="CAIXA MESTRE" className="h-full w-full object-contain" />
+            <img src="/caixa-mestre-pwa/caixa-mestre-logo.png" alt="CAIXA MESTRE" className="h-full w-full object-contain" />
           </div>
           <div className="mt-4 text-xl font-semibold">CAIXA MESTRE</div>
           <div className="mt-1 text-sm text-white/70">Gestão de Estoque</div>

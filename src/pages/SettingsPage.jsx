@@ -216,8 +216,24 @@ export default function SettingsPage() {
   }
 
   async function installApp() {
-    setToastType('info')
-    setToast('Para instalar o app, use o menu do navegador e selecione "Instalar" ou "Adicionar à tela inicial".')
+    // Verificar se o prompt de instalação está disponível
+    const deferredPrompt = window.deferredPrompt
+    
+    if (deferredPrompt) {
+      deferredPrompt.prompt()
+      const { outcome } = await deferredPrompt.userChoice
+      if (outcome === 'accepted') {
+        setToastType('success')
+        setToast('App instalado com sucesso!')
+      } else {
+        setToastType('info')
+        setToast('Instalação cancelada.')
+      }
+      window.deferredPrompt = null
+    } else {
+      setToastType('info')
+      setToast('Para instalar o app, use o menu do navegador (⋮) e selecione "Instalar" ou "Adicionar à tela inicial".')
+    }
   }
 
   return (
