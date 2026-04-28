@@ -254,8 +254,12 @@ export default function SettingsPage() {
   }
 
   async function installApp() {
-    // Verificar se o app já está instalado
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    // Verificar se o app já está instalado (método compatível com mobile)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                        window.navigator.standalone === true ||
+                        document.referrer.includes('android-app://')
+    
+    if (isStandalone) {
       setToastType('warning')
       setToast('O app já está instalado no seu dispositivo!')
       return
@@ -276,8 +280,20 @@ export default function SettingsPage() {
       }
       window.deferredPrompt = null
     } else {
-      setToastType('info')
-      setToast('Para instalar o app, use o menu do navegador (⋮) e selecione "Instalar" ou "Adicionar à tela inicial".')
+      // No mobile, mostrar instruções específicas
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+      const isAndroid = /Android/.test(navigator.userAgent)
+      
+      if (isIOS) {
+        setToastType('info')
+        setToast('Para instalar: Toque em "Compartilhar" (⬆️) → "Adicionar à Tela Inicial"')
+      } else if (isAndroid) {
+        setToastType('info')
+        setToast('Para instalar: Toque no menu (⋮) → "Instalar aplicativo" ou "Adicionar à tela inicial"')
+      } else {
+        setToastType('info')
+        setToast('Para instalar o app, use o menu do navegador (⋮) e selecione "Instalar" ou "Adicionar à tela inicial".')
+      }
     }
   }
 
