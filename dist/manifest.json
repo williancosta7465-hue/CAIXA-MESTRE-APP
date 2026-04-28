@@ -1,0 +1,24 @@
+{
+  "name": "CAIXA MESTRE",
+  "short_name": "CAIXA MESTRE",
+  "description": "Gestão de Estoque",
+  "start_url": "/CAIXA-MESTRE-APP/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/caixa-mestre-pwa/caixa-mestre-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/caixa-mestre-pwa/caixa-mestre-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
