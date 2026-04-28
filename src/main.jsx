@@ -5,6 +5,12 @@ import App from './App.jsx'
 import { AuthProvider } from './auth/AuthProvider.jsx'
 import './index.css'
 
+// Limpar URLs malformadas do histórico (problema com 404.html antigo)
+if (window.location.href.includes('~and~') || window.location.pathname.includes('//')) {
+  console.log('URL malformada detectada, limpando...')
+  window.location.replace('/CAIXA-MESTRE-APP/')
+}
+
 // Registrar Service Worker para PWA
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
