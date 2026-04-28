@@ -254,6 +254,13 @@ export default function SettingsPage() {
   }
 
   async function installApp() {
+    // Verificar se o app já está instalado
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setToastType('warning')
+      setToast('O app já está instalado no seu dispositivo!')
+      return
+    }
+    
     // Verificar se o prompt de instalação está disponível
     const deferredPrompt = window.deferredPrompt
     
