@@ -143,6 +143,11 @@ export default function UsersPage() {
 
       await db.users.add(user)
 
+      // Verificar se usuário foi salvo corretamente
+      const savedUser = await db.users.where('login').equals(user.login).first()
+      console.log('Usuário salvo:', savedUser)
+      console.log('Hash da senha:', user.senhaHash)
+
       await addAuditLog({
         usuarioId: session?.usuarioId ?? null,
         usuarioNome: session?.usuarioNome ?? null,
@@ -153,7 +158,7 @@ export default function UsersPage() {
       })
 
       setToastType('success')
-      setToast('Usuário criado.')
+      setToast('Usuário criado. Verifique o console para depuração.')
       setOpen(false)
       setForm({ nome: '', login: '', senha: '', perfil: 'almoxarife', perguntaSeguranca: 'Qual o nome da sua mãe?', respostaSeguranca: '' })
       await reload()

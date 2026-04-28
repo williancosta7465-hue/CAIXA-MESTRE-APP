@@ -29,7 +29,10 @@ export async function login({ login, senha }) {
   await ensureSeedData()
   const user = await db.users.where('login').equals(login).first()
 
+  console.log('Tentativa de login:', { login, usuarioEncontrado: !!user, ativo: user?.ativo })
+
   if (!user || !user.ativo) {
+    console.log('Usuário não encontrado ou inativo:', user)
     await addAuditLog({
       usuarioId: null,
       usuarioNome: null,
@@ -41,7 +44,10 @@ export async function login({ login, senha }) {
     throw new Error('Usuário ou senha inválidos.')
   }
 
+  console.log('Verificando senha:', { senhaDigitada: senha, hashArmazenado: user.senhaHash })
   const ok = await verifyPassword(senha, user.senhaHash)
+  console.log('Senha verificada:', ok)
+  
   if (!ok) {
     const tentativas = (user.tentativasLogin ?? 0) + 1
     await db.users.update(user.id, { tentativasLogin: tentativas })
