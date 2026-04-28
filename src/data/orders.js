@@ -178,15 +178,15 @@ export async function generateOrderPDF(pedido, userName = 'Sistema', returnBlob 
   try {
     const possiblePaths = [
       '/somente-a-logo.png',
+      './somente-a-logo.png',
+      'somente-a-logo.png',
       '/CAIXA-MESTRE-APP/somente-a-logo.png',
       '/caixa-mestre-pwa/somente-a-logo.png',
-      'somente-a-logo.png',
-      './somente-a-logo.png',
       '/caixa-mestre-logo.png',
-      '/CAIXA-MESTRE-APP/caixa-mestre-logo.png',
-      '/caixa-mestre-pwa/caixa-mestre-logo.png',
+      './caixa-mestre-logo.png',
       'caixa-mestre-logo.png',
-      './caixa-mestre-logo.png'
+      '/CAIXA-MESTRE-APP/caixa-mestre-logo.png',
+      '/caixa-mestre-pwa/caixa-mestre-logo.png'
     ]
     
     let logoBase64 = null
