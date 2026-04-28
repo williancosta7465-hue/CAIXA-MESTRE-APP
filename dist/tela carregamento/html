@@ -1,0 +1,34 @@
+<div id="splash">
+
+  <!-- PARTE BRANCA -->
+  <div class="topo">
+    <img src="assets/somente-a-logo.png" class="logo">
+
+    <h1>CAIXA <span>MESTRE</span></h1>
+    <h2>GESTÃO DE ESTOQUE</h2>
+
+    <div class="slogan">
+      <span></span>
+      Organize. Controle. Cresça.
+      <span></span>
+    </div>
+
+    <p class="carregando">Carregando...</p>
+
+    <div class="barra">
+      <div class="progresso"></div>
+    </div>
+  </div>
+
+  <!-- BASE AZUL -->
+  <div class="base">
+    <div class="rodape">
+      <span>🛡️ Seguro</span>
+      <span>•</span>
+      <span>Confiável</span>
+      <span>•</span>
+      <span>Eficiente</span>
+    </div>
+  </div>
+
+</div>
