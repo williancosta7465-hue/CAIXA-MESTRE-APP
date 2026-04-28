@@ -7,7 +7,20 @@
     <link rel="manifest" href="/CAIXA-MESTRE-APP/manifest.json" />
     <meta name="theme-color" content="#4f46e5" />
     <link rel="stylesheet" href="/CAIXA-MESTRE-APP/tela carregamento/css">
-    <script type="module" crossorigin src="/CAIXA-MESTRE-APP/assets/index-CviDU69E.js"></script>
+    <script>
+      // LIMPEZA RADICAL - Executa imediatamente
+      if (window.location.href.includes('~and~') || window.location.pathname.includes('//')) {
+        window.location.replace('/CAIXA-MESTRE-APP/')
+      }
+      // Limpar Service Worker e caches
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(r => r.forEach(s => s.unregister()))
+      }
+      if ('caches' in window) {
+        caches.keys().then(c => c.forEach(n => caches.delete(n)))
+      }
+    </script>
+    <script type="module" crossorigin src="/CAIXA-MESTRE-APP/assets/index-C2vNOq5V.js"></script>
     <link rel="stylesheet" crossorigin href="/CAIXA-MESTRE-APP/assets/index-CHN6imhX.css">
   </head>
   <body>
