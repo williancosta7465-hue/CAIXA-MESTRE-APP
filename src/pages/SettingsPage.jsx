@@ -65,23 +65,37 @@ export default function SettingsPage() {
       const text = await file.text()
       const data = JSON.parse(text)
 
-      if (!data.version || !Array.isArray(data.produtos)) {
-        throw new Error('Arquivo de backup inválido.')
+      // Verificar formato do backup (novo formato com 'dados' ou antigo com 'version')
+      let backupData = data
+      
+      // Se for formato antigo, converter para novo formato
+      if (data.version && !data.dados) {
+        backupData = {
+          id: crypto.randomUUID(),
+          dataCriacao: Date.now(),
+          versaoApp: data.version || '1.0.0',
+          dataHora: new Date().toISOString(),
+          dados: {
+            produtos: data.produtos || [],
+            funcionarios: data.funcionarios || [],
+            movimentacoes: data.movimentacoes || [],
+            users: data.users || [],
+            auditLogs: data.auditLogs || [],
+            settings: data.settings || [],
+            pedidosAtivo: data.pedidosAtivo || [],
+            pedidosArquivados: data.pedidosArquivados || [],
+            counters: data.counters || []
+          }
+        }
       }
 
-      await db.transaction('rw', db.produtos, db.funcionarios, db.movimentacoes, db.users, db.auditLogs, db.settings, async () => {
-        await db.produtos.clear()
-        await db.funcionarios.clear()
-        await db.movimentacoes.clear()
-        await db.auditLogs.clear()
-        await db.settings.clear()
+      // Validar formato
+      if (!backupData.dados) {
+        throw new Error('Arquivo de backup inválido: formato não reconhecido.')
+      }
 
-        if (data.produtos?.length) await db.produtos.bulkAdd(data.produtos)
-        if (data.funcionarios?.length) await db.funcionarios.bulkAdd(data.funcionarios)
-        if (data.movimentacoes?.length) await db.movimentacoes.bulkAdd(data.movimentacoes)
-        if (data.auditLogs?.length) await db.auditLogs.bulkAdd(data.auditLogs)
-        if (data.settings?.length) await db.settings.bulkAdd(data.settings)
-      })
+      // Usar função de restauração do backup.js
+      await restoreBackup(backupData, { usuario: session })
 
       setToastType('success')
       setToast('Backup restaurado. Recarregue a página.')
