@@ -141,6 +141,27 @@ export default function SettingsPage() {
     setToast('Configurações salvas.')
   }
 
+  async function clearDatabase() {
+    if (!confirm('Tem certeza que deseja limpar TODO o banco de dados? Esta ação não pode ser desfeita!')) return
+    setBusy(true)
+    try {
+      await db.delete()
+      setToastType('success')
+      setToast('Banco de dados limpo. A página será recarregada.')
+      setTimeout(() => window.location.reload(), 1500)
+    } catch (err) {
+      setToastType('error')
+      setToast(err?.message || 'Falha ao limpar banco de dados.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function installApp() {
+    setToastType('info')
+    setToast('Para instalar o app, use o menu do navegador e selecione "Instalar" ou "Adicionar à tela inicial".')
+  }
+
   return (
     <div className="space-y-4">
       <Toast message={toast} type={toastType} onClose={() => setToast(null)} />
@@ -254,6 +275,21 @@ export default function SettingsPage() {
             <Link className="rounded-xl bg-white/10 px-3 py-3 text-center text-sm font-semibold text-white" to="/usuarios">
               Gerenciar Usuários
             </Link>
+          </div>
+          <div className="mt-3 space-y-2">
+            <button
+              disabled={busy}
+              onClick={clearDatabase}
+              className="w-full rounded-xl bg-red-600/90 px-3 py-3 text-sm font-semibold text-white disabled:opacity-60"
+            >
+              {busy ? 'Limpando…' : 'Limpar Banco de Dados'}
+            </button>
+            <button
+              onClick={installApp}
+              className="w-full rounded-xl bg-blue-600/90 px-3 py-3 text-sm font-semibold text-white"
+            >
+              Baixar/Instalar App
+            </button>
           </div>
         </div>
       )}
