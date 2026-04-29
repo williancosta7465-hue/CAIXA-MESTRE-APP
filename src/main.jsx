@@ -5,6 +5,16 @@ import App from './App.jsx'
 import { AuthProvider } from './auth/AuthProvider.jsx'
 import './index.css'
 
+// Tentar remover Service Worker antigo e caches (mobile costuma manter versões antigas)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((regs) => {
+    regs.forEach((r) => r.unregister())
+  })
+}
+if ('caches' in window) {
+  caches.keys().then((names) => names.forEach((n) => caches.delete(n)))
+}
+
 // Limpar URLs malformadas se existirem
 if (window.location.pathname.includes('~and~') || 
     window.location.search.includes('~and~') || 

@@ -1,25 +1,16 @@
-const CACHE_NAME = 'caixa-mestre-v1'
-const urlsToCache = [
-  '/CAIXA-MESTRE-APP/',
-  '/CAIXA-MESTRE-APP/index.html',
-  '/CAIXA-MESTRE-APP/caixa-mestre-logo.png'
-]
+// Service Worker kill-switch: evita cache persistente no mobile
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting()
+})
+
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
+    caches.keys().then((cacheNames) => Promise.all(cacheNames.map((n) => caches.delete(n))))
+      .then(() => self.clients.claim())
   )
 })
 
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        if (response) {
-          return response
-        }
-        return fetch(event.request)
-      })
-  )
+  event.respondWith(fetch(event.request))
 })
