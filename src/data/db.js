@@ -129,7 +129,7 @@ async function importInitialData() {
     }))
     
     // Buscar arquivo de dados iniciais
-    const response = await fetch('/caixa-mestre-pwa/dados_importar.json')
+    const response = await fetch('./dados_importar.json')
     if (!response.ok) {
       const msg = 'Arquivo dados_importar.json não encontrado, pulando importação inicial'
       console.log(msg)
