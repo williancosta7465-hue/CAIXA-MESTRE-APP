@@ -1,17 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import Modal from '../components/Modal.jsx'
 import Toast from '../components/Toast.jsx'
-import PhotoCapture from '../components/PhotoCapture.jsx'
 import {
   PRODUCT_TYPES,
   createProduct,
   updateProduct,
-  deleteProduct,
   getProductSubLabel,
   getProductTypeLabel,
   listProducts
 } from '../data/products.js'
-import { createEmployee, updateEmployee, deleteEmployee, listEmployees } from '../data/employees.js'
+import { createEmployee, updateEmployee, listEmployees } from '../data/employees.js'
 
 const UNITS = [
   { value: 'unidade', label: 'Unidade' },
@@ -46,9 +44,6 @@ export default function ProductsPage() {
   const [editingProduct, setEditingProduct] = useState(null)
   const [editingEmployee, setEditingEmployee] = useState(null)
 
-  // Estados para Confirmação de Exclusão
-  const [deleteModal, setDeleteModal] = useState({ open: false, type: null, item: null })
-
   const [form, setForm] = useState({
     tipo: PRODUCT_TYPES.material,
     reutilizavel: false,
@@ -58,9 +53,7 @@ export default function ProductsPage() {
     unidade: 'unidade',
     quantidade: '0',
     estoqueMinimo: '0',
-    ca: '',
-    dataValidade: '',
-    foto: null
+    ca: ''
   })
 
   async function reload() {
@@ -146,29 +139,6 @@ export default function ProductsPage() {
     }
   }
 
-  async function confirmDelete() {
-    if (!deleteModal.item) return
-    
-    try {
-      if (deleteModal.type === 'produto') {
-        await deleteProduct(deleteModal.item.id)
-        setToastType('success')
-        setToast('Produto excluído com sucesso.')
-        await reload()
-      } else if (deleteModal.type === 'funcionario') {
-        await deleteEmployee(deleteModal.item.id)
-        setToastType('success')
-        setToast('Funcionário excluído com sucesso.')
-        await reloadEmployees()
-      }
-    } catch (err) {
-      setToastType('error')
-      setToast(err?.message || 'Falha ao excluir.')
-    } finally {
-      setDeleteModal({ open: false, type: null, item: null })
-    }
-  }
-
   const showCa = useMemo(() => {
     return form.tipo === PRODUCT_TYPES.epi
   }, [form.tipo])
@@ -191,7 +161,7 @@ export default function ProductsPage() {
       setToastType('success')
       setToast('Produto cadastrado.')
       setOpen(false)
-      setForm((f) => ({ ...f, nome: '', codigo: '', descricao: '', quantidade: '0', dataValidade: '', foto: null }))
+      setForm((f) => ({ ...f, nome: '', codigo: '', descricao: '', quantidade: '0' }))
       await reload()
     } catch (err) {
       setToastType('error')
@@ -212,9 +182,7 @@ export default function ProductsPage() {
       unidade: product.unidade || 'unidade',
       quantidade: String(product.quantidade ?? 0),
       estoqueMinimo: String(product.estoqueMinimo ?? 0),
-      ca: product.ca || '',
-      dataValidade: product.dataValidade || '',
-      foto: product.foto || null
+      ca: product.ca || ''
     })
     setOpen(true)
   }
@@ -229,7 +197,7 @@ export default function ProductsPage() {
 
     setBusy(true)
     try {
-      await updateProduct(editingProduct.id, form)
+      await updateProduct({ id: editingProduct.id, ...form })
       setToastType('success')
       setToast('Produto atualizado.')
       setOpen(false)
@@ -243,9 +211,7 @@ export default function ProductsPage() {
         unidade: 'unidade',
         quantidade: '0',
         estoqueMinimo: '0',
-        ca: '',
-        dataValidade: '',
-        foto: null
+        ca: ''
       })
       await reload()
     } catch (err) {
@@ -280,35 +246,15 @@ export default function ProductsPage() {
         <>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-lg font-semibold">Estoque</h1>
-              <button
-                onClick={() => {
-                  const csv = [
-                    ['Nome', 'Código', 'Tipo', 'Quantidade', 'Estoque Mínimo', 'Status'].join(';'),
-                    ...items.map(p => [
-                      p.nome, p.codigo, p.tipo, p.quantidade, p.estoqueMinimo, p.status
-                    ].join(';'))
-                  ].join('\n')
-                  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-                  const url = URL.createObjectURL(blob)
-                  const a = document.createElement('a')
-                  a.href = url
-                  a.download = `estoque-${new Date().toISOString().split('T')[0]}.csv`
-                  a.click()
-                  URL.revokeObjectURL(url)
-                }}
-                className="rounded-lg bg-white/10 px-3 py-1.5 text-xs font-semibold hover:bg-white/20"
-              >
-                Exportar CSV
-              </button>
+              <div className="text-sm font-semibold">Produtos</div>
+              <div className="text-xs text-white/70">{items.length} cadastrados</div>
             </div>
-            <div className="text-xs text-white/70">{items.length} cadastrados</div>
             <button className="rounded-xl bg-accent-600 px-3 py-2 text-xs font-semibold" onClick={() => setOpen(true)}>
               + Novo
             </button>
           </div>
 
-          <div className="rounded-2xl cm-card p-3">
+          <div className="rounded-2xl bg-white/10 p-3">
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
@@ -333,7 +279,7 @@ export default function ProductsPage() {
 
           <div className="space-y-3">
             {items.length === 0 ? (
-              <div className="rounded-2xl cm-card p-4 text-sm text-white/80">Nenhum produto encontrado.</div>
+              <div className="rounded-2xl bg-white/10 p-4 text-sm text-white/80">Nenhum produto encontrado.</div>
             ) : (
               items.map((p) => {
                 const min = Number(p.estoqueMinimo ?? 0)
@@ -345,16 +291,9 @@ export default function ProductsPage() {
                 const badgeText = below ? 'Abaixo do mínimo' : equal ? 'No mínimo' : 'OK'
 
                 return (
-                  <div key={p.id} className="rounded-2xl cm-card p-4">
-                    <div className="flex items-start gap-3">
-                      {p.foto && (
-                        <img
-                          src={p.foto}
-                          alt={p.nome}
-                          className="h-16 w-16 shrink-0 rounded-lg object-cover"
-                        />
-                      )}
-                      <div className="min-w-0 flex-1">
+                  <div key={p.id} className="rounded-2xl bg-white/10 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
                         <div className="truncate text-sm font-semibold">{p.nome}</div>
                         <div className="mt-1 text-xs text-white/70">
                           {getProductTypeLabel(p.tipo)}
@@ -381,12 +320,6 @@ export default function ProductsPage() {
                         >
                           ✏️ Editar
                         </button>
-                        <button
-                          onClick={() => setDeleteModal({ open: true, type: 'produto', item: p })}
-                          className="rounded-lg bg-red-500/20 px-2 py-1 text-[10px] text-red-300 hover:bg-red-500/30"
-                        >
-                          🗑️ Excluir
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -409,7 +342,7 @@ export default function ProductsPage() {
             </button>
           </div>
 
-          <div className="rounded-2xl cm-card p-3">
+          <div className="rounded-2xl bg-white/10 p-3">
             <input
               value={empQ}
               onChange={(e) => setEmpQ(e.target.value)}
@@ -420,10 +353,10 @@ export default function ProductsPage() {
 
           <div className="space-y-3">
             {employees.length === 0 ? (
-              <div className="rounded-2xl cm-card p-4 text-sm text-white/80">Nenhum funcionário encontrado.</div>
+              <div className="rounded-2xl bg-white/10 p-4 text-sm text-white/80">Nenhum funcionário encontrado.</div>
             ) : (
               employees.map((e) => (
-                <div key={e.id} className="rounded-2xl cm-card p-4">
+                <div key={e.id} className="rounded-2xl bg-white/10 p-4">
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="text-sm font-semibold">{e.nome}</div>
@@ -444,12 +377,6 @@ export default function ProductsPage() {
                       >
                         📋 Histórico
                       </button>
-                      <button
-                        onClick={() => setDeleteModal({ open: true, type: 'funcionario', item: e })}
-                        className="rounded-lg bg-red-500/20 px-2 py-1 text-[10px] text-red-300 hover:bg-red-500/30"
-                      >
-                        🗑️ Excluir
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -460,23 +387,7 @@ export default function ProductsPage() {
       )}
 
       {/* Modal Produto */}
-      <Modal open={open} title={editingProduct ? 'Editar produto' : 'Novo produto'} onClose={() => {
-        setOpen(false)
-        setEditingProduct(null)
-        setForm({
-          tipo: PRODUCT_TYPES.material,
-          reutilizavel: false,
-          nome: '',
-          codigo: '',
-          descricao: '',
-          unidade: 'unidade',
-          quantidade: '0',
-          estoqueMinimo: '0',
-          ca: '',
-          dataValidade: '',
-          foto: null
-        })
-      }}>
+      <Modal open={open} title={editingProduct ? 'Editar produto' : 'Novo produto'} onClose={() => { setOpen(false); setEditingProduct(null) }}>
         <form className="space-y-3" onSubmit={editingProduct ? onUpdate : onCreate}>
           <div>
             <div className="text-xs text-white/70">Tipo</div>
@@ -505,11 +416,6 @@ export default function ProductsPage() {
               </div>
             </label>
           ) : null}
-
-          <PhotoCapture
-            label="Foto do produto"
-            onCapture={(foto) => setForm((f) => ({ ...f, foto }))}
-          />
 
           <div>
             <div className="text-xs text-white/70">Nome</div>
@@ -578,19 +484,6 @@ export default function ProductsPage() {
             </div>
           ) : null}
 
-          {/* Data de Validade - para EPIs e Materiais */}
-          {(form.tipo === PRODUCT_TYPES.epi || form.tipo === PRODUCT_TYPES.material) && (
-            <div>
-              <div className="text-xs text-white/70">Data de Validade (opcional)</div>
-              <input
-                type="date"
-                value={form.dataValidade}
-                onChange={(e) => setForm((f) => ({ ...f, dataValidade: e.target.value }))}
-                className="mt-1 w-full rounded-xl bg-white/10 px-3 py-3 text-sm outline-none"
-              />
-            </div>
-          )}
-
           <button
             disabled={busy}
             className="w-full rounded-xl bg-accent-600 px-3 py-3 text-sm font-semibold text-white disabled:opacity-60"
@@ -598,41 +491,6 @@ export default function ProductsPage() {
             {busy ? 'Salvando…' : 'Salvar'}
           </button>
         </form>
-      </Modal>
-
-      {/* Modal de Confirmação de Exclusão */}
-      <Modal 
-        open={deleteModal.open} 
-        title={deleteModal.type === 'produto' ? 'Confirmar exclusão de produto' : 'Confirmar exclusão de funcionário'}
-        onClose={() => setDeleteModal({ open: false, type: null, item: null })}
-      >
-        <div className="text-center">
-          <div className="text-sm mb-2">
-            Tem certeza que deseja excluir:
-          </div>
-          <div className="text-lg font-semibold text-red-300">
-            {deleteModal.item?.nome}
-          </div>
-          {deleteModal.type === 'funcionario' && (
-            <div className="text-xs text-amber-300 mt-2">
-              ⚠️ O funcionário não pode ter empréstimos pendentes.
-            </div>
-          )}
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <button
-            onClick={() => setDeleteModal({ open: false, type: null, item: null })}
-            className="rounded-xl bg-white/10 px-3 py-2 text-sm font-semibold"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={confirmDelete}
-            className="rounded-xl bg-red-500 px-3 py-2 text-sm font-semibold text-white"
-          >
-            🗑️ Excluir
-          </button>
-        </div>
       </Modal>
 
       {/* Modal Funcionário */}

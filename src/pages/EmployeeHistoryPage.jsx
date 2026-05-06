@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import Toast from '../components/Toast.jsx'
 import BackButton from '../components/BackButton.jsx'
 import { db } from '../data/db.js'
@@ -16,12 +16,12 @@ function formatDate(ts) {
 
 export default function EmployeeHistoryPage() {
   const { employeeId } = useParams()
+  const navigate = useNavigate()
   const [employee, setEmployee] = useState(null)
   const [movements, setMovements] = useState([])
   const [toast, setToast] = useState(null)
   const [toastType, setToastType] = useState('info')
   const [dias, setDias] = useState('90')
-  const [expandedMovement, setExpandedMovement] = useState(null)
 
   useEffect(() => {
     async function load() {
@@ -75,7 +75,7 @@ export default function EmployeeHistoryPage() {
       <BackButton />
 
       {employee && (
-        <div className="rounded-2xl cm-card p-4">
+        <div className="rounded-2xl bg-white/10 p-4">
           <div className="text-sm font-semibold">{employee.nome}</div>
           <div className="mt-1 text-xs text-white/70">
             {employee.funcao || 'Sem função cadastrada'} • {employee.matricula || 'Sem matrícula'}
@@ -97,7 +97,7 @@ export default function EmployeeHistoryPage() {
         </div>
       )}
 
-      <div className="rounded-2xl cm-card p-3">
+      <div className="rounded-2xl bg-white/10 p-3">
         <div className="text-xs font-semibold text-white/70 mb-2">Período</div>
         <select 
           value={dias} 
@@ -113,76 +113,42 @@ export default function EmployeeHistoryPage() {
 
       <div className="space-y-3">
         {movements.length === 0 ? (
-          <div className="rounded-2xl cm-card p-4 text-sm text-white/80">
+          <div className="rounded-2xl bg-white/10 p-4 text-sm text-white/80">
             Nenhuma movimentação encontrada neste período.
           </div>
         ) : (
-          movements.map((m) => {
-            return (
-              <div key={m.id} className="rounded-2xl cm-card p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold">{m.produtoNome}</div>
-                    <div className="mt-1 text-xs text-white/70">
-                      {m.produto ? getProductTypeLabel(m.produto.tipo) : 'Produto'} • {formatDate(m.dataMovimentacao)}
-                    </div>
-                    <div className="mt-1 text-xs">
-                      <span className={m.tipoMovimentacao === 'saida-emprestimo' ? 'text-amber-400' : 'text-emerald-400'}>
-                        {m.tipoMovimentacao === 'saida-emprestimo' ? '📦 Empréstimo' : '📤 Entrega'}
-                      </span>
-                      {' • '}
-                      <span className={
-                        m.status === 'concluido' ? 'text-emerald-400' :
-                        m.status === 'pendente-devolucao' ? 'text-amber-400' :
-                        m.status === 'perdido' ? 'text-red-400' :
-                        'text-white/70'
-                      }>
-                        {m.status === 'concluido' ? 'Concluído' :
-                         m.status === 'pendente-devolucao' ? 'Pendente' :
-                         m.status === 'perdido' ? 'Perdido' :
-                         m.status}
-                      </span>
-                    </div>
-                    {m.quantidade > 1 && (
-                      <div className="mt-1 text-xs text-white/70">Quantidade: {m.quantidade}</div>
-                    )}
-                    {(m.fotoEntrega || m.assinaturaFuncionario) && (
-                      <button
-                        onClick={() => setExpandedMovement(expandedMovement === m.id ? null : m.id)}
-                        className="mt-2 text-xs text-accent-400 hover:text-accent-300"
-                      >
-                        {expandedMovement === m.id ? '▲ Ocultar comprovantes' : '▼ Ver comprovantes'}
-                      </button>
-                    )}
-                    {expandedMovement === m.id && (
-                      <div className="mt-3 space-y-3">
-                        {m.fotoEntrega && (
-                          <div>
-                            <div className="text-xs text-white/60 mb-1">Foto da entrega</div>
-                            <img
-                              src={m.fotoEntrega}
-                              alt="Foto da entrega"
-                              className="w-full max-h-48 rounded-lg object-cover"
-                            />
-                          </div>
-                        )}
-                        {m.assinaturaFuncionario && (
-                          <div>
-                            <div className="text-xs text-white/60 mb-1">Assinatura do funcionário</div>
-                            <img
-                              src={m.assinaturaFuncionario}
-                              alt="Assinatura"
-                              className="w-full max-h-32 rounded-lg bg-white/10 object-contain"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )}
+          movements.map((m) => (
+            <div key={m.id} className="rounded-2xl bg-white/10 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-semibold">{m.produtoNome}</div>
+                  <div className="mt-1 text-xs text-white/70">
+                    {m.produto ? getProductTypeLabel(m.produto.tipo) : 'Produto'} • {formatDate(m.dataMovimentacao)}
                   </div>
+                  <div className="mt-1 text-xs">
+                    <span className={m.tipoMovimentacao === 'saida-emprestimo' ? 'text-amber-400' : 'text-emerald-400'}>
+                      {m.tipoMovimentacao === 'saida-emprestimo' ? '📦 Empréstimo' : '📤 Entrega'}
+                    </span>
+                    {' • '}
+                    <span className={
+                      m.status === 'concluido' ? 'text-emerald-400' :
+                      m.status === 'pendente-devolucao' ? 'text-amber-400' :
+                      m.status === 'perdido' ? 'text-red-400' :
+                      'text-white/70'
+                    }>
+                      {m.status === 'concluido' ? 'Concluído' :
+                       m.status === 'pendente-devolucao' ? 'Pendente' :
+                       m.status === 'perdido' ? 'Perdido' :
+                       m.status}
+                    </span>
+                  </div>
+                  {m.quantidade > 1 && (
+                    <div className="mt-1 text-xs text-white/70">Quantidade: {m.quantidade}</div>
+                  )}
                 </div>
               </div>
-            )
-          })
+            </div>
+          ))
         )}
       </div>
     </div>
