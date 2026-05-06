@@ -3,20 +3,20 @@
   "short_name": "CAIXA MESTRE",
   "description": "Gestão de Estoque",
   "version": "1.2.0",
-  "start_url": "/CAIXA-MESTRE-APP/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#1a1a2e",
   "theme_color": "#4f46e5",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/CAIXA-MESTRE-APP/icon-192.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/CAIXA-MESTRE-APP/icon-512.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
